@@ -27,7 +27,6 @@
                   dense
                   :rules="labelRules"
                   @blur="validateAndUpdate(account)"
-                  persistent-hint
                 />
               </v-col>
               <v-col class="flex-grow-1">
@@ -41,7 +40,7 @@
               </v-col>
               <v-col class="flex-grow-1">
                 <v-text-field
-                  label="Логин"
+                  label="Значение"
                   dense
                   v-model="account.login"
                   :rules="requiredHundredRules"
@@ -87,7 +86,7 @@ const { accounts } = storeToRefs(store);
 
 // Правила валидации
 const labelRules = [
-  (v?: string) => !v ? '' : v.length <= 50 || 'Максимум 50 символов',
+  (v?: string) => !v || v.length <= 50 || 'Максимум 50 символов',
 ];
 
 const requiredHundredRules = [
@@ -108,9 +107,10 @@ const validateAndUpdate = (account: Account) => {
   // Валидация (Vuetify rules уже покажут ошибки)
   // Но для сохранения проверяем, если нет ошибок
   const isValid = 
+    labelRules.every((rule) => rule(getLabelInput(account)) === true) &&
     requiredHundredRules.every((rule) => rule(account.login) === true) &&
-    (account.type !== AccountType.Local || requiredHundredRules.every((rule) => rule(account.password) === true));
-
+    (account.type !== AccountType.Local || requiredHundredRules.every((rule) => rule(account.password || undefined) === true));
+    
   if (isValid) {
     updateAccount(account);
   }
